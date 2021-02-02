@@ -5,6 +5,14 @@ SITES_AVAILABLE="/etc/nginx/sites-available/"
 
 arrDOM=(${DOMAIN//./ })                                                              
 arrDOM_LEN="${#arrDOM[@]}"
+host=\$'host'
+uri=\$'uri'
+request_method=\$'request_method'
+request_uri=\$'request_uri'
+document_root=\$'document_root'
+fastcgi_script_name=\$'fastcgi_script_name'
+document_root=\$'document_root'
+
 
 FULL_PATH_VH=$SITES_AVAILABLE$DOMAIN.conf
 echo "full_path: "$FULL_PATH_VH
@@ -14,28 +22,27 @@ then
   if [ $arrDOM_LEN == 2 ]
   then
     echo "Type DOMAIN"
-    echo "path: "${SITES_AVAILABLE}${DOMAIN}.conf
-    sudo bash -c "/bin/cat > ${SITES_AVAILABLE}${DOMAIN}.conf <<EOF
-
-    server {
+    echo "path: "$FULL_PATH_VH
+     sudo bash -c "cat << EOF >$FULL_PATH_VH
+server {
         client_max_body_size 500M;
 
-        if (\$host = www.$DOMAIN) {
-            return 301 https://\$host\$request_uri;
+        if ( \\$host = www.$DOMAIN) {
+            return 301 https://\\$host\\$request_uri;
         } 
 
-        if (\$host = $DOMAIN) {
-            return 301 https://\$host\$request_uri;
+        if ( \\$host = $DOMAIN) {
+            return 301 https://\\$host\\$request_uri;
         } 
 
-       if (\$request_method !~ ^(GET|HEAD|POST)$ )
+       if ( \\$request_method !~ ^(GET|HEAD|POST)$ )
         {
         return 405;
         }
 
         listen       80;
         server_name  $DOMAIN  www.$DOMAIN;
-        return       301 https://$DOMAIN\$request_uri;
+        return       301 https://$DOMAIN\\$request_uri;
     }
 
     server {
@@ -53,10 +60,10 @@ then
         index index.php index.html index.htm;
 
             location / {
-                   try_files \$uri \$uri/ /index.php?\$query_string;
+                   try_files \\$uri \\$uri/ /index.php?\\$query_string;
             }
 
-          if (\$request_method !~ ^(GET|HEAD|POST)$ )
+          if (\\$request_method !~ ^(GET|HEAD|POST)$ )
             {
             return 405;
             }
@@ -69,8 +76,8 @@ then
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         include         fastcgi_params;
-        fastcgi_param   SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
-        fastcgi_param   SCRIPT_NAME        \$fastcgi_script_name;
+        fastcgi_param   SCRIPT_FILENAME    \\$document_root\\$fastcgi_script_name;
+        fastcgi_param   SCRIPT_NAME        \\$fastcgi_script_name;
     }
     }
 
@@ -93,10 +100,10 @@ then
 
             location / {
       
-                   try_files \$uri \$uri/ /index.php?\$query_string;
+                   try_files \\$uri \\$uri/ /index.php?\\$query_string;
             }
 
-        if (\$request_method !~ ^(GET|HEAD|POST)$ )
+        if (\\$request_method !~ ^(GET|HEAD|POST)$ )
             {
             return 405;
             }
@@ -104,38 +111,39 @@ then
         location ~* \.php$ 
     {
         # With php-fpm unix sockets
-        try_files \$uri =404;
+        try_files \\$uri =404;
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         include         fastcgi_params;
-        fastcgi_param   SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
-        fastcgi_param   SCRIPT_NAME        \$fastcgi_script_name;
+        fastcgi_param   SCRIPT_FILENAME    \\$document_root\\$fastcgi_script_name;
+        fastcgi_param   SCRIPT_NAME        \\$fastcgi_script_name;
 
     }
     }
 
 EOF
 "
+
 elif [ $arrDOM_LEN == 3 ]
 then
   echo "Type SUBDOMAIN"
-  echo "path: "${SITES_AVAILABLE}${DOMAIN}.conf
-  sudo bash -c "/bin/cat > $FULL_PATH_VH <<EOF  
+  echo "path: "$FULL_PATH_VH
+ sudo bash -c "cat << EOF > $FULL_PATH_VH  
         server {
         client_max_body_size 500M;
 
-        if (\$host = $DOMAIN) {
-            return 301 https://\$host\$request_uri;
+        if (\\$host = $DOMAIN) {
+            return 301 https://\\$host\\$request_uri;
         }
 
-        if (\$request_method !~ ^(GET|HEAD|POST)$ )
+        if (\\$request_method !~ ^(GET|HEAD|POST)$ )
           {
           return 405;
           }
 
         listen       80;
         server_name  $DOMAIN ;
-        return       301 https://$DOMAIN\$request_uri;
+        return       301 https://$DOMAIN\\$request_uri;
     }
 
     server {
@@ -153,10 +161,10 @@ then
         index index.php index.html index.htm;
 
             location / {
-                   try_files \$uri \$uri/ /index.php?\$query_string;
+                   try_files \\$uri \\$uri/ /index.php?\\$query_string;
             }
 
-          if (\$request_method !~ ^(GET|HEAD|POST)$ )
+          if (\\$request_method !~ ^(GET|HEAD|POST)$ )
             {
             return 405;
             }
@@ -165,16 +173,17 @@ then
 
 
         # With php-fpm unix sockets
-        try_files \$uri =404;
+        try_files \\$uri =404;
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         include         fastcgi_params;
-        fastcgi_param   SCRIPT_FILENAME    \$document_root\$fastcgi_script_name;
-        fastcgi_param   SCRIPT_NAME        \$fastcgi_script_name;
+        fastcgi_param   SCRIPT_FILENAME    \\$document_root\\$fastcgi_script_name;
+        fastcgi_param   SCRIPT_NAME        \\$fastcgi_script_name;
     }
     }
 EOF
 "
+
   else
     echo "BAD DOMAIN: "$DOMAIN
   fi
