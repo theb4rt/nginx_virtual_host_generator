@@ -73,7 +73,7 @@ server {
 
 
         # With php-fpm unix sockets
-        try_files \$uri =404;
+        try_files \\$uri =404;
         fastcgi_pass unix:/run/php/php7.4-fpm.sock;
         fastcgi_index index.php;
         include         fastcgi_params;
