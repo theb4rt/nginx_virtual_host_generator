@@ -12,6 +12,7 @@ request_uri=\$'request_uri'
 document_root=\$'document_root'
 fastcgi_script_name=\$'fastcgi_script_name'
 document_root=\$'document_root'
+$query_string=\$'query_string;';
 
 
 FULL_PATH_VH=$SITES_AVAILABLE$DOMAIN.conf
